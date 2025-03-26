@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.title-gradient {
+    @apply text-3xl font-extrabold tracking-wide italic;
+    font-family: 'Orbitron', sans-serif; /* Application de la police Orbitron */
+    background: linear-gradient(to right, #1e3a8a, #3b82f6);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
