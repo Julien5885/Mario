@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 
 class FilmApiController extends Controller
 {
-    public function showFilms()
+    public function showFilms(Request $request)
     { $films = [
         [
             'filmId' => 1,
@@ -26,6 +26,18 @@ class FilmApiController extends Controller
             'idDirector' => 2,
         ]
     ];
+        // Récupérer le mot-clé de recherche
+        $search = $request->input('search');
+
+        // Si un terme est fourni, filtrer le tableau des films
+        if ($search) {
+            $films = array_filter($films, function($film) use ($search) {
+                return stripos($film['title'], $search) !== false ||
+                       stripos($film['description'], $search) !== false;
+            });
+            
+        }
+    
     return view('films', ['films' => $films]);
     }
     public function editFilm($filmId)
