@@ -45,7 +45,8 @@ Route::prefix('/toad/film')->name('film.')->controller(FilmApiController::class)
     Route::put('/update/{id}', 'updateFilm')->name('update');
     Route::post('/add', 'addFilm')->name('add');
     Route::delete('/delete/{id}', 'deleteFilm')->name('delete');
-    Route::get('/getById', 'getFilmById')->name('getById'); // Optionnel
+    Route::get('/getById', 'getFilmById')->name('getById'); 
+    Route::view('/toad/film/create', 'add-film')->name('film.create');
 });
 
 // -------------------------------------------------------------
