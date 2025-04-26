@@ -12,25 +12,25 @@
             @apply inline-block font-bold py-2 px-4 transition duration-300;
         }
         .btn-edit {
-            background: linear-gradient(135deg, #0062E6, #33AEFF);
+            background: linear-gradient(135deg,rgb(79, 131, 199), rgb(63, 34, 209));
             border: 2px solid #004BA0;
             color: white;
             @apply rounded-full;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
         .btn-edit:hover {
-            background: linear-gradient(135deg, #0052C4, #2790E0);
+            background: linear-gradient(135deg,rgb(79, 131, 199), rgb(46, 36, 240));
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
         }
         .btn-cancel {
-            background: linear-gradient(135deg, #9CA3AF,rgb(36, 33, 33));
+            background: linear-gradient(135deg,rgb(125, 121, 121), rgb(237, 5, 5));
             border: 2px solid #4B5563;
             color: white;
             @apply rounded-full;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
         .btn-cancel:hover {
-            background: linear-gradient(135deg, #6B7280, #4B5563);
+            background: linear-gradient(135deg, #C9302C,rgb(245, 8, 8));
             box-shadow: 0 6px 8px rgba(176, 101, 101, 0.3);
         }
         /* Optionnel : ajustement du relief sur le bouton Rechercher, si nécessaire */
@@ -157,12 +157,12 @@
 
             <!-- Boutons -->
             <div class="flex items-center justify-between mt-4">
-                <button type="submit" class="btn-custom btn-edit">
-                    Enregistrer les modifications
-                </button>
-                <a href="{{ url('/toad/film/all') }}" class="btn-custom btn-cancel">
-                    Annuler
-                </a>
+            <button type="submit" class="btn-edit rounded-full py-2 px-6 font-bold transition duration-300">
+    Enregistrer les modifications
+</button>
+<a href="{{ url('/toad/film/all') }}" class="btn-cancel rounded-full py-2 px-6 font-bold transition duration-300">
+    Annuler
+</a>
             </div>
         </form>
     </div>
