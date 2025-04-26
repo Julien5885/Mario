@@ -1,139 +1,91 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\FilmApiController;
-use App\Http\Controllers\UserApiController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
-use App\Http\Controllers\DirectorController;
 use Illuminate\Http\Request;
+
+// Import des contrôleurs
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserApiController;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\FilmApiController;
 use App\Http\Controllers\FilmInventoryController;
+use App\Http\Controllers\DirectorController;
 
+/*
+|--------------------------------------------------------------------------
+| Routes principales de l'application
+|--------------------------------------------------------------------------
+*/
 
-
-// ----------------------------------------------------------------------
-// 1. Page d'accueil : redirection vers la page de connexion personnalisée
-// ----------------------------------------------------------------------
+// -------------------------------------------------------------
+// 1. Page d'accueil : redirection vers page de connexion Staff
+// -------------------------------------------------------------
 Route::get('/', function () {
     return view('auth.login_staff');
 });
+
+// Dashboard après connexion
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->name('dashboard');
 
-Route::prefix('/toad/film')->name('film.')->controller(FilmApiController::class)->group(function () {
-    Route::get('/all', 'showFilms')->name('list');
-    // ...
-});
-
+// -------------------------------------------------------------
+// 2. Connexion / Déconnexion pour Staff
+// -------------------------------------------------------------
+Route::post('/login_staff', [ApiController::class, 'login'])->name('login_staff');
 Route::post('/logout_staff', [ApiController::class, 'logout'])->name('logout_staff');
 
-// ----------------------------------------------------------------------
-// 2. Nouvelle route de connexion
-// ----------------------------------------------------------------------
-Route::post('/login_staff', [ApiController::class, 'login'])->name('login_staff');
-
-
-
-    Route::prefix('/toad/film')->name('film.')->controller(FilmApiController::class)->group(function () {
-    // Affichage de tous les films
+// -------------------------------------------------------------
+// 3. Gestion des Films (FilmApiController)
+// -------------------------------------------------------------
+Route::prefix('/toad/film')->name('film.')->controller(FilmApiController::class)->group(function () {
     Route::get('/all', 'showFilms')->name('list');
-
-    // Affichage du formulaire d'édition d’un film
     Route::get('/edit/{id}', 'editFilm')->name('edit');
-
-    // Mise à jour d’un film (méthode PUT)
     Route::put('/update/{id}', 'updateFilm')->name('update');
-
-    // Ajout d’un film
     Route::post('/add', 'addFilm')->name('add');
-
-    // Suppression d’un film
     Route::delete('/delete/{id}', 'deleteFilm')->name('delete');
+    Route::get('/getById', 'getFilmById')->name('getById'); // Optionnel
 });
 
-
-    Route::get('/inventory', [FilmInventoryController::class, 'index'])->name('inventory');
-    Route::get('/inventory/create', [FilmInventoryController::class, 'create'])->name('inventory.create');
-    Route::post('/inventory', [FilmInventoryController::class, 'store'])->name('inventory.store');
-    
-/*
-// ----------------------------------------------------------------------
-// 3. (Optionnel) Anciennes routes protégées par "auth" et "verified"
-//    --> On les commente ou on les supprime pour désactiver l'auth Laravel
-// ----------------------------------------------------------------------
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/Mario', function () {
-        return view('dashboard');
-    })->name('dashboard');
+// -------------------------------------------------------------
+// 4. Gestion de l'Inventaire (FilmInventoryController)
+// -------------------------------------------------------------
+Route::prefix('/inventory')->controller(FilmInventoryController::class)->group(function () {
+    Route::get('/', 'index')->name('inventory');
+    Route::get('/create', 'create')->name('inventory.create');
+    Route::post('/', 'store')->name('inventory.store');
+    Route::get('/{id}/edit', 'edit')->name('inventory.edit');
+    Route::put('/{id}', 'update')->name('inventory.update');
+    Route::delete('/{id}', 'destroy')->name('inventory.destroy');
 });
-*/
 
-// ----------------------------------------------------------------------
-// 4. Suppression ou adaptation des routes qui étaient protégées par "auth"
-//    --> On les rend publiques (ou on les protège autrement) :
-// ----------------------------------------------------------------------
-
-/*
-// Ancien middleware('auth') — on le commente pour enlever la protection Laravel
-Route::middleware('auth')->group(function () {
-    // Gestion des utilisateurs
-    Route::controller(ProfileController::class)->group(function () {
-        Route::get('/profile', 'edit')->name('profile.edit');
-        Route::patch('/profile', 'update')->name('profile.update');
-        Route::delete('/profile', 'destroy')->name('profile.destroy');
-    });
-
-    // Utilisateurs bloqués
-    Route::controller(UserApiController::class)->group(function () {
-        Route::get('/users/blocked', 'getBlockedUsers')->name('users.blocked');
-        Route::post('/users/unlock/{id}', 'unlockUser')->name('users.unlock');
-    });
-
-    // Gestion des films
-    Route::prefix('/toad/film')->name('film.')->controller(FilmApiController::class)->group(function () {
-        Route::post('/add', 'addFilm')->name('add');
-        Route::get('/getById', 'getFilmById')->name('getById');
-        Route::get('/all', 'showFilms')->name('list');
-        Route::get('/edit/{id}', 'editFilm')->name('edit');
-        Route::put('/update/{id}', 'updateFilm')->name('update');
-        Route::delete('/delete/{id}', 'deleteFilm')->name('delete');
-    });
-});
-*/
-
-// ----------------------------------------------------------------------
-// 5. On rend ces routes publiques (si souhaité) en les sortant du middleware
-// ----------------------------------------------------------------------
-
-// Gestion des utilisateurs
+// -------------------------------------------------------------
+// 5. Gestion du Profil Utilisateur (ProfileController)
+// -------------------------------------------------------------
 Route::controller(ProfileController::class)->group(function () {
     Route::get('/profile', 'edit')->name('profile.edit');
     Route::patch('/profile', 'update')->name('profile.update');
     Route::delete('/profile', 'destroy')->name('profile.destroy');
 });
 
-// Utilisateurs bloqués
+// -------------------------------------------------------------
+// 6. Gestion des Utilisateurs Bloqués (UserApiController)
+// -------------------------------------------------------------
 Route::controller(UserApiController::class)->group(function () {
     Route::get('/users/blocked', 'getBlockedUsers')->name('users.blocked');
     Route::post('/users/unlock/{id}', 'unlockUser')->name('users.unlock');
 });
 
-// Gestion des films
-Route::prefix('/toad/film')->name('film.')->controller(FilmApiController::class)->group(function () {
-    Route::post('/add', 'addFilm')->name('add');
-    Route::get('/getById', 'getFilmById')->name('getById');
-    Route::get('/all', 'showFilms')->name('list');
-    Route::get('/edit/{id}', 'editFilm')->name('edit');
-    Route::put('/update/{id}', 'updateFilm')->name('update');
-    Route::delete('/delete/{id}', 'deleteFilm')->name('delete');
-});
+// -------------------------------------------------------------
+// 7. Gestion des Réalisateurs (via API externe et Controller)
+// -------------------------------------------------------------
 
-// ----------------------------------------------------------------------
-// 6. Routes directeurs (exemples existants, conservés)
-// ----------------------------------------------------------------------
-Route::get('/directors/film-count', function (Request $request) {
+// Variables serveur API
+$serverUrl = env('SERVEUR') . env('PORT');
+
+// Rechercher nombre de films par réalisateur (appel externe)
+Route::get('/directors/film-count', function (Request $request) use ($serverUrl) {
     try {
         $nom = $request->query('nom');
         $prenom = $request->query('prenom');
@@ -142,25 +94,22 @@ Route::get('/directors/film-count', function (Request $request) {
             return response()->json(['error' => 'Paramètres "nom" et "prenom" requis'], 400);
         }
 
-        $response = Http::get('http://localhost:8080/api/directors/film-count', [
+        $response = Http::get($serverUrl . '/api/directors/film-count', [
             'nom' => $nom,
             'prenom' => $prenom,
         ]);
 
-        if ($response->successful()) {
-            return $response->json();
-        } else {
-            return response()->json([
-                'error' => 'Erreur lors de la récupération des données de l\'API',
-                'details' => $response->json(),
-            ], $response->status());
-        }
+        return $response->successful()
+            ? $response->json()
+            : response()->json(['error' => 'Erreur API', 'details' => $response->json()], $response->status());
+
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
 });
 
-Route::get('/director/find-by-name', function (Request $request) {
+// Rechercher un réalisateur par nom (appel externe)
+Route::get('/director/find-by-name', function (Request $request) use ($serverUrl) {
     $nom = $request->query('nom');
     $prenom = $request->query('prenom');
 
@@ -168,41 +117,15 @@ Route::get('/director/find-by-name', function (Request $request) {
         return response()->json(['error' => 'Paramètres "nom" et "prenom" requis'], 400);
     }
 
-    $response = Http::get('http://localhost:8080/api/director/find-by-name', [
+    $response = Http::get($serverUrl . '/api/director/find-by-name', [
         'nom' => $nom,
         'prenom' => $prenom,
     ]);
 
-    if ($response->successful()) {
-        return $response->json();
-    } else {
-        return response()->json([
-            'error' => 'Erreur lors de la récupération des données de l\'API',
-            'details' => $response->body(),
-        ], $response->status());
-    }
+    return $response->successful()
+        ? $response->json()
+        : response()->json(['error' => 'Erreur API', 'details' => $response->body()], $response->status());
 });
 
-
-// Contrôleur pour la recherche du réalisateur avec le nombre de films
+// Utiliser ton propre Controller interne (DirectorController)
 Route::get('/api/directors/find-by-name-with-count', [DirectorController::class, 'findDirectorByNameWithFilmCount']);
-
-Route::prefix('inventory')->group(function(){
-    // listing existant
-    Route::get('/', [FilmInventoryController::class, 'index'])->name('inventory');
-
-    // création existante
-    Route::get('/create', [FilmInventoryController::class, 'create'])->name('inventory.create');
-    Route::post('/',     [FilmInventoryController::class, 'store'])->name('inventory.store');
-
-    // **édition**
-    Route::get('/{id}/edit',   [FilmInventoryController::class, 'edit'])->name('inventory.edit');
-    Route::put('/{id}',        [FilmInventoryController::class, 'update'])->name('inventory.update');
-
-    // suppression (déjà en dur dans votre table)
-    Route::delete('/{id}',     [FilmInventoryController::class, 'destroy'])->name('inventory.destroy');
-});
-
-
-
-
