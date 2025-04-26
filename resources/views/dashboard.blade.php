@@ -31,7 +31,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="card-relief">
                 <div class="p-6 text-gray-900">
-                    {{ __("Bienvenue sur l'application Web Mario !!
+                    {{ __("Bienvenue sur l'application Web Mario !! Ici voups pouvez gérer l'inventaire des films pour nos clients du village vacance.
                            ") }}
                 </div>
             </div>
