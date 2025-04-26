@@ -58,7 +58,8 @@
         @endif
 
         <!-- Formulaire pour ajouter un nouveau film -->
-        <form method="POST" action="{{ route('inventory.store') }}" class="border border-gray-300 bg-white p-6 rounded shadow-md">
+        <form method="POST" action="{{ url('/toad/film/add') }}" class="border border-gray-300 bg-white p-6 rounded shadow-md">
+
             @csrf
 
             <!-- Partie : Informations sur le film -->
