@@ -2,28 +2,36 @@
 
 namespace App\Http\Controllers;
 
+// Importation des classes nécessaires
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Http; // Pour envoyer des requêtes HTTP facilement
+use Illuminate\Pagination\LengthAwarePaginator; // Pour paginer manuellement
+use Carbon\Carbon; // Pour manipuler les dates
 
+// Déclaration du contrôleur
 class FilmApiController extends Controller
 {
+    // Variable pour stocker l'URL de base de l'API
     private $baseUrl;
 
+    // Constructeur du contrôleur
     public function __construct()
     {
+        // On construit l'URL de base à partir des variables d'environnement
         $this->baseUrl = env('SERVEUR') . env('PORT') . '/toad/film';
     }
 
+    // Fonction pour afficher la liste des films
     public function showFilms(Request $request)
     {
         try {
+            // Requête GET vers l'API pour récupérer tous les films
             $response = Http::get($this->baseUrl . '/all');
 
             if ($response->successful()) {
                 $films = $response->json();
 
+                // Si un mot-clé de recherche est fourni, on filtre les films
                 $search = $request->input('search');
                 if ($search) {
                     $films = array_filter($films, function ($film) use ($search) {
@@ -32,6 +40,7 @@ class FilmApiController extends Controller
                     });
                 }
 
+                // Mise en place de la pagination manuelle
                 $currentPage = LengthAwarePaginator::resolveCurrentPage();
                 $perPage = 10;
                 $currentItems = array_slice($films, ($currentPage - 1) * $perPage, $perPage);
@@ -44,27 +53,34 @@ class FilmApiController extends Controller
                     ['path' => LengthAwarePaginator::resolveCurrentPath()]
                 );
 
+                // Affichage de la vue 'films' avec les films paginés
                 return view('films', ['films' => $paginatedFilms]);
             } else {
+                // En cas d'erreur de réponse API
                 return view('films', ['films' => collect(), 'errorMessage' => 'Erreur : ' . $response->status()]);
             }
         } catch (\Exception $e) {
+            // En cas d'exception (erreur serveur, connexion, etc.)
             return view('films', ['films' => collect(), 'errorMessage' => $e->getMessage()]);
         }
     }
 
+    // Fonction pour afficher le formulaire d'édition d'un film
     public function editFilm($filmId)
     {
         try {
+            // Requête pour récupérer les informations du film à modifier
             $response = Http::get($this->baseUrl . "/getById", ['id' => (int) $filmId]);
 
             if ($response->successful()) {
                 $film = $response->json();
 
                 if (empty($film)) {
+                    // Si le film n'est pas trouvé
                     return view('edit-film', ['film' => null, 'errorMessage' => "Film non trouvé"]);
                 }
 
+                // Sinon, afficher les informations du film
                 return view('edit-film', ['film' => $film]);
             } else {
                 return view('edit-film', ['film' => null, 'errorMessage' => 'Erreur : ' . $response->status()]);
@@ -74,14 +90,17 @@ class FilmApiController extends Controller
         }
     }
 
+    // Fonction pour mettre à jour les informations d'un film
     public function updateFilm(Request $request, $filmId)
     {
         try {
+            // On récupère uniquement les champs utiles
             $data = $request->only([
                 'title', 'description', 'releaseYear', 'languageId', 'originalLanguageId',
                 'rentalDuration', 'rentalRate', 'length', 'replacementCost', 'rating', 'lastUpdate'
             ]);
 
+            // Conversion des champs aux bons formats
             $data['releaseYear'] = (int) ($data['releaseYear'] ?? 0);
             $data['languageId'] = (int) ($data['languageId'] ?? 0);
             $data['originalLanguageId'] = (int) ($data['originalLanguageId'] ?? 0);
@@ -90,10 +109,12 @@ class FilmApiController extends Controller
             $data['replacementCost'] = (float) ($data['replacementCost'] ?? 0);
             $data['length'] = (int) ($data['length'] ?? 0);
 
+            // Formatage de la date de dernière mise à jour
             $data['lastUpdate'] = !empty($data['lastUpdate'])
                 ? Carbon::parse(str_replace('T', ' ', $data['lastUpdate']))->format('Y-m-d H:i:s')
                 : now()->format('Y-m-d H:i:s');
 
+            // Requête PUT pour envoyer les modifications à l'API
             $response = Http::asForm()->put($this->baseUrl . "/update/{$filmId}", $data);
 
             if ($response->successful()) {
@@ -106,8 +127,10 @@ class FilmApiController extends Controller
         }
     }
 
+    // Fonction pour ajouter un nouveau film
     public function addFilm(Request $request)
     {
+        // Requête POST pour créer un film
         $response = Http::asForm()->post($this->baseUrl . '/add', [
             'title' => $request->title,
             'description' => $request->description,
@@ -122,12 +145,15 @@ class FilmApiController extends Controller
             'lastUpdate' => now()->format('Y-m-d H:i:s'),
         ]);
 
+        // Retourne la réponse sous forme de tableau JSON
         return $response->json();
     }
 
+    // Fonction pour supprimer un film
     public function deleteFilm($id)
     {
         try {
+            // Requête DELETE pour supprimer un film
             $response = Http::delete($this->baseUrl . "/delete/{$id}");
 
             if ($response->successful()) {
