@@ -39,19 +39,6 @@
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
         }
 
-        /* Bouton Ajouter */
-        .btn-create {
-            background: linear-gradient(135deg, rgb(79, 131, 199), rgb(63, 34, 209));
-            border: 2px solid rgb(63, 34, 209);
-            color: white;
-            @apply inline-block font-bold py-3 px-8 rounded-full text-lg transition duration-300;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .btn-create:hover {
-            background: linear-gradient(135deg, rgb(79, 131, 199), rgb(46, 36, 240));
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
-        }
-
         /* Conteneur de la table */
         .table-container {
             @apply bg-white shadow-lg hover:shadow-2xl transition-shadow duration-300 rounded overflow-x-auto;
@@ -69,12 +56,6 @@
 
     <!-- Partie supérieure : bouton Ajouter + champ Recherche -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 flex justify-between items-center space-x-4 py-6">
-
-        <!-- Bouton pour ajouter un nouveau film -->
-        <a href="{{ route('inventory.create') }}" 
-           class="btn-create flex items-center justify-center h-12 w-72 text-lg rounded-full">
-            Ajouter un film
-        </a>
 
         <!-- Champ de recherche -->
         <input type="text" id="searchInput" placeholder="Rechercher"
