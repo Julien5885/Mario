@@ -1,167 +1,118 @@
-<?php
+<x-app-layout>
+    <!-- Titre principal de la page -->
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Gestion de l\'Inventaire') }}
+        </h2>
+    </x-slot>
 
-namespace App\Http\Controllers;
-
-// Importation des classes nécessaires
-use Illuminate\Http\Request;
-use GuzzleHttp\Client;
-
-// Déclaration du contrôleur FilmInventoryController
-class FilmInventoryController extends Controller
-{
-    // URL de base pour l'API
-    private $baseUrl;
-
-    // Constructeur du contrôleur
-    public function __construct()
-    {
-        // Initialisation de l'URL de base depuis les variables d'environnement
-        $this->baseUrl = env('SERVEUR') . env('PORT');
-    }
-
-    // Méthode pour afficher la liste de tous les inventaires
-    public function index()
-    {
-        $client = new Client();
-
-        // Récupération de tous les inventaires
-        $responseInventory = $client->get($this->baseUrl . '/toad/inventory/all');
-        $inventories = json_decode($responseInventory->getBody(), true);
-
-        // Récupération de tous les films pour faire le lien Film => Titre
-        $responseFilms = $client->get($this->baseUrl . '/toad/film/all');
-        $films = json_decode($responseFilms->getBody(), true);
-
-        // Construction d'un tableau associatif filmId => titre
-        $filmMapping = [];
-        foreach ($films as $film) {
-            if (isset($film['filmId']) && isset($film['title'])) {
-                $filmMapping[$film['filmId']] = $film['title'];
-            }
+    <!-- Section CSS pour personnaliser l'apparence -->
+    <style>
+        /* Style générique pour tous les boutons */
+        .btn-custom {
+            @apply inline-block font-bold text-center transition duration-300;
         }
 
-        // Affichage de la vue "inventory" avec les données récupérées
-        return view('inventory', compact('inventories', 'filmMapping'));
-    }
-
-    // Méthode pour afficher le formulaire de création d'un nouvel inventaire
-    public function create()
-    {
-        return view('inventory_create');
-    }
-
-    // Méthode pour enregistrer un nouvel inventaire
-    public function store(Request $request)
-    {
-        $client = new Client();
-
-        // Préparation des données pour créer un nouveau film
-        $filmData = [
-            'title'              => $request->input('title'),
-            'description'        => $request->input('description'),
-            'releaseYear'        => $request->input('releaseYear'),
-            'languageId'         => $request->input('languageId', 1),
-            'originalLanguageId' => $request->input('originalLanguageId', 1),
-            'rentalDuration'     => $request->input('rentalDuration', 3),
-            'rentalRate'         => $request->input('rentalRate', 4.99),
-            'length'             => $request->input('length', 120),
-            'replacementCost'    => $request->input('replacementCost', 19.99),
-            'rating'             => $request->input('rating', 'G'),
-            'lastUpdate'         => now()->toDateTimeString(),
-        ];
-
-        // Requête pour ajouter le film
-        $filmResponse = $client->post($this->baseUrl . '/toad/film/add', [
-            'form_params' => $filmData
-        ]);
-
-        // On récupère la réponse de l'API
-        $filmResponseData = json_decode($filmResponse->getBody(), true);
-        $filmId = $filmResponseData['filmId'] ?? null;
-
-        // Vérification de la création du film
-        if (!$filmId) {
-            return redirect()->back()->with('error', 'Erreur lors de la création du film.');
+        /* Bouton Modifier */
+        .btn-edit {
+            background: linear-gradient(135deg, rgb(79, 131, 199), rgb(63, 34, 209));
+            border: 2px solid #004BA0;
+            color: white;
+            @apply rounded-full;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .btn-edit:hover {
+            background: linear-gradient(135deg, rgb(79, 131, 199), rgb(46, 36, 240));
+            box-shadow: 0 6px 8px rgb(8, 75, 244);
         }
 
-        // Préparation des données pour créer un nouvel inventaire lié au film
-        $inventoryData = [
-            'film_id'     => $filmId,
-            'store_id'    => $request->input('store_id'),
-            'last_update' => now()->toDateTimeString(),
-            'existe'      => true, // Par défaut l'inventaire est disponible
-        ];
-
-        // Requête pour ajouter l'inventaire
-        $client->post($this->baseUrl . '/toad/inventory/add', [
-            'form_params' => $inventoryData
-        ]);
-
-        return redirect()->route('inventory')->with('success', 'Film et inventaire créés avec succès.');
-    }
-
-    // Méthode pour afficher le formulaire d'édition d'un inventaire existant
-    public function edit($id)
-    {
-        $client = new Client();
-
-        // Récupération des détails de l'inventaire par son ID
-        $resp = $client->get($this->baseUrl . '/toad/inventory/getById', [
-            'query' => ['id' => $id]
-        ]);
-        $inventory = json_decode($resp->getBody(), true);
-
-        // Récupération de tous les films pour pouvoir changer le film associé
-        $filmsResp = $client->get($this->baseUrl . '/toad/film/all');
-        $films = json_decode($filmsResp->getBody(), true);
-
-        // Construction d'un tableau filmId => titre
-        $filmMapping = [];
-        foreach ($films as $f) {
-            $filmMapping[$f['filmId']] = $f['title'];
+        /* Bouton Supprimer */
+        .btn-delete {
+            background: linear-gradient(135deg, rgb(125, 121, 121), rgb(237, 5, 5));
+            border: 2px solid #C9302C;
+            color: white;
+            @apply rounded-full;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .btn-delete:hover {
+            background: linear-gradient(135deg, #C9302C, rgb(245, 8, 8));
+            box-shadow: 0 6px 8px rgb(237, 6, 6);
         }
 
-        // Affichage de la vue "inventory_update" avec l'inventaire et les films disponibles
-        return view('inventory_update', compact('inventory', 'filmMapping'));
-    }
+        /* Conteneur de la table */
+        .table-container {
+            @apply bg-white shadow-lg hover:shadow-2xl transition-shadow duration-300 rounded overflow-x-auto;
+            margin-left: 2rem;
+            margin-right: 2rem;
+            padding: 2rem;
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
 
-    // Méthode pour mettre à jour un inventaire existant
-    public function update(Request $request, $id)
-    {
-        $client = new Client();
-
-        // Formatage correct de la date de dernière mise à jour
-        $lastUpdateInput = $request->input('last_update');
-        if ($lastUpdateInput) {
-            $lastUpdate = str_replace('T', ' ', $lastUpdateInput) . ':00.0';
-        } else {
-            $lastUpdate = now()->format('Y-m-d H:i:s') . '.0';
         }
 
-        // Préparation des données pour la mise à jour
-        $payload = [
-            'film_id'     => (int) $request->input('film_id'),
-            'store_id'    => (int) $request->input('store_id'),
-            'last_update' => $lastUpdate,
-            'existe'      => $request->has('existe') ? true : false,
-        ];
+        /* Cellules du tableau */
+        th, td {
+            padding: 0.75rem 1.5rem;
+            white-space: nowrap;
+        }
+    </style>
 
-        // Requête pour mettre à jour l'inventaire
-        $client->put($this->baseUrl . "/toad/inventory/update/{$id}", [
-            'form_params' => $payload,
-        ]);
+    <!-- Conteneur du tableau d'inventaire -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 flex justify-between items-center py-6">
+    <input id="searchInput" type="text" placeholder="Rechercher"
+           class="border rounded-full h-12 w-72 px-6 focus:ring-2 focus:ring-blue-500">
+  </div>
 
-        return redirect()->route('inventory')->with('success', 'Inventaire mis à jour.');
-    }
+  <div class="table-container max-w-7xl mx-auto px-8 mb-8">
+    <div class="bg-white shadow-lg rounded overflow-x-auto p-6">
+      <table class="table-auto w-full divide-y divide-gray-200 text-center">
+        <thead class="bg-gray-50">
+          <tr>
+            <th>Film</th>
+            <th>Quantité</th>
+            <th>Adresse</th>
+            <th>District</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50">
+          @forelse($inventories as $inv)
+            <tr>
+              <td class="py-2">{{ $inv['title'] }}</td>
+              <td>{{ $inv['quantity'] }}</td>
+              <td>{{ $inv['address'] }}</td>
+              <td>{{ $inv['district'] }}</td>
+              <td>
+                {{-- On fait un DELETE sur /toad/inventory/deleteDVD/{filmId} --}}
+                <form action="{{ route('inventory.destroy', $inv['filmId']) }}" method="POST"
+                      onsubmit="return confirm('Supprimer tout le stock disponible ?');">
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit"
+                          class="btn-custom btn-delete text-xs px-4 py-2">
+                    Supprimer
+                  </button>
+                </form>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="5" class="py-4 text-gray-500">Aucun enregistrement trouvé.</td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    // Méthode pour supprimer un inventaire
-    public function destroy($id)
-    {
-        $client = new Client();
+  {{-- Script de recherche --}}
+  <script>
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+      let kw = this.value.toLowerCase();
+      document.querySelectorAll('tbody tr').forEach(tr => {
+        let title = tr.children[0]?.textContent.toLowerCase() || '';
+        tr.style.display = title.includes(kw) ? '' : 'none';
+      });
+    });
+  </script>
 
-        // Requête DELETE pour supprimer un inventaire par ID
-        $client->delete($this->baseUrl . "/toad/inventory/delete/{$id}");
-
-        return redirect()->route('inventory')->with('success', 'Inventaire supprimé.');
-    }
-}
+</x-app-layout>
