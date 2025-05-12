@@ -60,7 +60,6 @@ Route::prefix('/inventory')->controller(FilmInventoryController::class)->group(f
     Route::put('/{id}', 'update')->name('inventory.update');
     Route::delete('/{id}', 'destroy')->name('inventory.destroy');
 });
-
 // -------------------------------------------------------------
 // 5. Gestion du Profil Utilisateur (ProfileController)
 // -------------------------------------------------------------
@@ -71,15 +70,7 @@ Route::controller(ProfileController::class)->group(function () {
 });
 
 // -------------------------------------------------------------
-// 6. Gestion des Utilisateurs Bloqués (UserApiController)
-// -------------------------------------------------------------
-Route::controller(UserApiController::class)->group(function () {
-    Route::get('/users/blocked', 'getBlockedUsers')->name('users.blocked');
-    Route::post('/users/unlock/{id}', 'unlockUser')->name('users.unlock');
-});
-
-// -------------------------------------------------------------
-// 7. Gestion des Réalisateurs (via API externe et Controller)
+// 6. Gestion des Réalisateurs (via API externe et Controller)
 // -------------------------------------------------------------
 
 // Variables serveur API
@@ -128,5 +119,4 @@ Route::get('/director/find-by-name', function (Request $request) use ($serverUrl
         : response()->json(['error' => 'Erreur API', 'details' => $response->body()], $response->status());
 });
 
-// Utiliser ton propre Controller interne (DirectorController)
-Route::get('/api/directors/find-by-name-with-count', [DirectorController::class, 'findDirectorByNameWithFilmCount']);
+
