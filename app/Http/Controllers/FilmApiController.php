@@ -145,7 +145,6 @@ class FilmApiController extends Controller
             'lastUpdate' => now()->format('Y-m-d H:i:s'),
         ]);
 
-        // Retourne la réponse sous forme de tableau JSON
         return $response->json();
     }
 

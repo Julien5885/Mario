@@ -8,126 +8,68 @@
 
     <!-- Styles personnalisés pour cette page -->
     <style>
-    /* Bouton Ajouter */
-    .btn-create {
-        background: linear-gradient(135deg, rgb(93, 170, 211), rgb(63, 34, 209));
-        border: 2px solid rgb(63, 34, 209);
-        color: white;
-        @apply inline-block font-bold text-lg transition duration-300;
-        height: 3rem;
-        min-width: 12rem;
-        padding: 0 2rem;
-        border-radius: 9999px;
-        box-shadow: 0 4px 8px rgba(155, 146, 146, 0.2);
-        text-align: center;
-        justify-content: center;
-        align-items: center;
-        display: flex;
-    }
-    .btn-create:hover {
-        background: linear-gradient(135deg, rgb(79, 131, 199), rgb(46, 36, 240));
-        box-shadow: 0 6px 8px rgb(99, 95, 95);
-    }
+        /* Boutons personnalisés avec dégradé et arrondi personnalisé */
+        .btn-custom {
+            @apply inline-block font-bold py-2 px-4 transition duration-300;
+        }
+        .btn-edit {
+            background: linear-gradient(135deg, rgb(146, 163, 179), rgb(59, 89, 209));
+            border: 2px solid #004BA0;
+            color: white;
+            @apply rounded-full;
+        }
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #0052C4, #2790E0);
+        }
+        .btn-delete {
+            background: linear-gradient(135deg, rgb(171, 140, 140), rgb(196, 112, 112));
+            border: 2px solid #C9302C;
+            color: white;
+            @apply rounded-full;
+        }
+        .btn-delete:hover {
+            background: linear-gradient(135deg, rgb(125, 121, 121), rgb(237, 5, 5));
+        }
+        /* Bouton Rechercher personnalisé */
+        .btn-search {
+            background: linear-gradient(135deg,rgb(162, 175, 186), rgb(73, 75, 174));
+            border: 2px solid #003F7A;
+            color: white;
+            @apply font-bold py-2 px-4 rounded-full transition duration-300;
+        }
+        .btn-search:hover {
+            background: linear-gradient(135deg, #003F7A, #005AA8);
+        }
+        /* Carte de film avec dégradé et effet de survol */
+        .card {
+            @apply shadow-lg rounded-lg p-6 transform transition duration-300;
+            background: linear-gradient(135deg, rgb(235, 236, 238), rgb(77, 102, 178));
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        /* Styles pour améliorer la lisibilité du texte */
+        .film-title {
+            @apply text-2xl font-semibold text-gray-800 leading-tight;
+        }
+        .film-description {
+            @apply text-gray-700 leading-relaxed text-base;
+        }
+        .film-year {
+            @apply text-gray-700 text-sm;
+        }
+    </style>
 
-    /* Bouton Rechercher */
-    .btn-search {
-        background: linear-gradient(135deg, rgb(127, 133, 130), rgb(66, 73, 69)); 
-        border: 2px solid rgb(71, 78, 74);
-        color: white;
-        @apply inline-block font-bold text-lg transition duration-300;
-        height: 3rem;
-        min-width: 12rem;
-        padding: 0 2rem;
-        border-radius: 9999px;
-        box-shadow: 0 4px 8px rgb(25, 66, 148);
-        text-align: center;
-        justify-content: center;
-        align-items: center;
-        display: flex;
-    }
-    .btn-search:hover {
-        background: linear-gradient(135deg, rgb(126, 125, 149), rgb(22, 59, 153));
-        box-shadow: 0 6px 8px rgba(163, 143, 143, 0.3);
-    }
-
-    /* Champ de recherche */
-    .search-input {
-        @apply border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg;
-        height: 3rem;
-        width: 18rem;
-        padding-left: 1.5rem;
-        border-radius: 9999px; /* <-- ajout ici pour l'arrondir */
-    }
-
-    /* Boutons Modifier / Supprimer */
-    .btn-custom {
-        @apply inline-block font-bold py-2 px-4 transition duration-300;
-        border-radius: 9999px;
-    }
-    .btn-edit {
-        background: linear-gradient(135deg, rgb(79, 131, 199), rgb(38, 52, 212));
-        border: 2px solid rgb(38, 52, 212);
-        color: white;
-    }
-    .btn-edit:hover {
-        background: linear-gradient(135deg, rgb(73, 123, 193), rgb(17, 106, 249));
-    }
-    .btn-delete {
-        background: linear-gradient(135deg, rgb(171, 140, 140), rgb(192, 58, 58));
-        border: 2px solid rgb(192, 58, 58);
-        color: white;
-    }
-    .btn-delete:hover {
-        background: linear-gradient(135deg, rgb(212, 188, 188), rgb(255, 0, 0));
-    }
-
-    /* Carte de présentation d'un film */
-    .card {
-        @apply shadow-lg p-6 transform transition duration-300;
-        border-radius: 1rem;
-        background: linear-gradient(135deg, rgb(235, 236, 238), rgb(77, 102, 178));
-    }
-    .card:hover {
-        transform: scale(1.05);
-    }
-
-    /* Texte */
-    .film-title {
-        @apply text-2xl font-semibold text-gray-800 leading-tight;
-    }
-    .film-description {
-        @apply text-gray-700 leading-relaxed text-base;
-    }
-    .film-year {
-        @apply text-gray-700 text-sm;
-    }
-
-    /* Conteneur "Ajouter + Rechercher" */
-    .toolbar {
-        background: white;
-        border-radius: 1rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        padding: 2rem;
-        margin-bottom: 2rem;
-    }
-</style>
-
-    <div class="container mx-auto px-4 py-12">
-        
-        <!-- Ligne bouton Ajouter un film + recherche -->
-        <div class="toolbar flex flex-wrap gap-6 justify-center md:justify-between items-center mb-10">
-            <a href="{{ url('/toad/film/create') }}" class="btn-create">
-                Ajouter un film
-            </a>
-
-            <form method="GET" action="{{ url('/toad/film/all') }}" class="flex flex-wrap gap-2 items-center">
-                <input type="text" name="search" placeholder="Rechercher un film..." value="{{ request('search') }}"
-                       class="search-input">
-                <button type="submit" class="btn-search">
-                    Rechercher
-                </button>
-            </form>
-        </div>
+    <div class="container mx-auto px-4 py-8">
+        <!-- Barre de recherche -->
+        <form method="GET" action="{{ url('/toad/film/all') }}" class="mb-6 flex">
+            <input type="text" name="search" placeholder="Rechercher un film..."
+                   class="border border-gray-300 p-2 w-full rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   value="{{ request('search') }}">
+            <button type="submit" class="btn-search">
+                Rechercher
+            </button>
+        </form>
 
         <!-- Affichage des erreurs -->
         @if(isset($errorMessage))
