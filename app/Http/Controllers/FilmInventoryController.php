@@ -24,25 +24,27 @@ class FilmInventoryController extends Controller
     {
         $client = new Client();
 
-        // Récupération de tous les inventaires
-        $responseInventory = $client->get($this->baseUrl . '/toad/inventory/all');
-        $inventories = json_decode($responseInventory->getBody(), true);
+        // 1) On récupère le stock groupé (titre, qty, adresse, district…)
+        $resp = $client->get($this->baseUrl . '/toad/inventory/getStockByStore');
+        $inventories = json_decode($resp->getBody()->getContents(), true);
 
-        // Récupération de tous les films pour faire le lien Film => Titre
-        $responseFilms = $client->get($this->baseUrl . '/toad/film/all');
-        $films = json_decode($responseFilms->getBody(), true);
+        // 2) Pour chaque film, on récupère un ID d’inventaire libre
+        foreach ($inventories as &$inv) {
+            $availResp = $client->get($this->baseUrl . '/toad/inventory/available/getById', [
+                'query' => ['id' => $inv['filmId']],
+            ]);
 
-        // Construction d'un tableau associatif filmId => titre
-        $filmMapping = [];
-        foreach ($films as $film) {
-            if (isset($film['filmId']) && isset($film['title'])) {
-                $filmMapping[$film['filmId']] = $film['title'];
-            }
+            $body   = trim($availResp->getBody()->getContents());
+            $freeId = is_numeric($body) ? (int) $body : null;
+
+            $inv['inventoryId'] = $freeId;
+            $inv['available']   = $freeId !== null;
         }
+        unset($inv);
 
-        // Affichage de la vue "inventory" avec les données récupérées
-        return view('inventory', compact('inventories', 'filmMapping'));
+        return view('inventory', compact('inventories'));
     }
+
 
     // Méthode pour afficher le formulaire de création d'un nouvel inventaire
     public function create()
