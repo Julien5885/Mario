@@ -126,27 +126,42 @@ class FilmApiController extends Controller
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
-
-    // Fonction pour ajouter un nouveau film
     public function addFilm(Request $request)
     {
-        // Requête POST pour créer un film
-        $response = Http::asForm()->post($this->baseUrl . '/add', [
-            'title' => $request->title,
-            'description' => $request->description,
-            'releaseYear' => (int) $request->releaseYear,
-            'languageId' => (int) $request->languageId,
-            'originalLanguageId' => (int) $request->originalLanguageId,
-            'rentalDuration' => (int) $request->rentalDuration,
-            'rentalRate' => (float) $request->rentalRate,
-            'length' => (int) $request->length,
-            'replacementCost' => (float) $request->replacementCost,
-            'rating' => $request->rating,
-            'lastUpdate' => now()->format('Y-m-d H:i:s'),
+        // 1) Création du film
+        $filmResp = Http::asForm()->post($this->baseUrl . '/add', [
+            'title'              => $request->title,
+            // … les autres champs film …
         ]);
-
-        return $response->json();
+    
+        if (! $filmResp->successful()) {
+            return back()->withErrors(['error' => 'Échec création film']);
+        }
+    
+        $filmData = $filmResp->json();
+        $filmId   = $filmData['filmId'] ?? null;
+        if (! $filmId) {
+            return back()->withErrors(['error' => 'filmId introuvable']);
+        }
+    
+        // 2) Création de l’inventaire pour ce film
+        $invResp = Http::asForm()->post(env('SERVEUR') . env('PORT') . '/toad/inventory/add', [
+            'film_id'     => $filmId,
+            'store_id'    => (int) $request->store_id,      
+            'last_update' => now()->format('Y-m-d H:i:s'),
+            'existe'      => true,
+        ]);
+    
+        if (! $invResp->successful()) {
+            return back()->withErrors([
+                'error' => "Film créé (ID={$filmId}), mais inventaire KO ({$invResp->status()})"
+            ]);
+        }
+    
+        return redirect()->route('film.list')
+                         ->with('success', 'Film et inventaire créés.');
     }
+    
 
     // Fonction pour supprimer un film
     public function deleteFilm($id)
